@@ -14,16 +14,18 @@ const db = mysql.createConnection({
     database: "node_react_crud"
 });
 
-// backend runs in port
+// backend runs in port 8081
 app.listen(8081, () => {
     console.log("listening to port 8081");
 })
+
+// ----------------------------------------- Student Backend Functions -------------------------------------
 
 // fetch all data from student table
 app.get('/', (req, res) => {
     const qry = "SELECT * FROM student";
     db.query(qry, (err, result) => {
-        if(err) return res.json({Message: "Error fetching student data"});
+        if(err) return res.json("error->",err);
         return res.json(result);
     })
 });
@@ -36,7 +38,40 @@ app.post('/addStudent', (req, res) => {
         req.body.email
     ]
     db.query(qry, [values], (err, result) => {
-        if(err) return res.json({Message: "Error adding new student"});
+        if(err) return res.json("error->",err);
         return res.json(result);
     })
 });
+
+// fetch student data by id
+app.get('/viewStudent/:id', (req, res) => {
+    const qry = "SELECT * FROM student WHERE id = ?";
+    const id = req.params.id
+    db.query(qry, [id], (err, result) => {
+        if(err) return res.json("error->",err);
+        return res.json(result);
+    })
+});
+
+// update student
+app.put('/updateStudent/:id', (req, res) => {
+    const qry = "UPDATE student SET `name` = ? , `email` = ? WHERE id = ?";
+    const id = req.params.id;
+    const { name, email } = req.body;
+    db.query(qry, [name, email, id], (err, result) => {
+        if(err) return res.json("error->",err);
+        return res.json(result);
+    })
+});
+
+// delete student
+app.delete('/deleteStudent/:id', (req, res) => {
+    const qry = "DELETE FROM student WHERE id = ?";
+    const id = req.params.id;
+    db.query(qry, [id], (err, result) => {
+        if(err) return res.json("error->",err);
+        return res.json(result);
+    })
+});
+
+// ----------------------------------------- End of Student Backend Functions -------------------------------------

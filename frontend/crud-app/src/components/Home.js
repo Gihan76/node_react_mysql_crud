@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import axios from 'axios'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Home = () => {
+    const navigate = useNavigate();
     const [studentData, setStudentData] = useState([]);
 
     // get all student data from db
@@ -10,13 +11,27 @@ export const Home = () => {
         axios
             .get('http://localhost:8081/')
             .then((res) => {
-                console.log("🚀 ~ .then ~ res:", res)
-                setStudentData(res?.data);
+                // console.log("🚀 ~ .then ~ res:", res)
+                setStudentData(res?.data?.length ? res?.data : []);
             })
             .catch((err) => {
                 console.log("🚀 ~ useEffect ~ err:", err)
             })
     }, []);
+
+    // delete student
+    const handleDelete = (id) => {
+        axios
+            .delete(`http://localhost:8081/deleteStudent/${id}`)
+            .then((res) => {
+                // console.log("🚀 ~ .then ~ res:", res)
+                // location.reload();
+                navigate(0);
+            })
+            .catch((err) => {
+                console.log("🚀 ~ handleDelete ~ err:", err)
+            });
+    };
 
     return (
         <div className="d-flex vh-100 bg-primary justify-content-center align-items-center">
@@ -42,9 +57,9 @@ export const Home = () => {
                                     <td>{d?.name}</td>
                                     <td>{d?.email}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-info">View</button>
-                                        <button className="btn btn-sm btn-primary mx-2">Edit</button>
-                                        <button className="btn btn-sm btn-danger">Delete</button>
+                                        <Link to={`/view/${d?.id}`} className="btn btn-sm btn-info">View</Link>
+                                        <Link to={`/edit/${d?.id}`} className="btn btn-sm btn-warning mx-2">Edit</Link>
+                                        <button onClick={() => handleDelete(d?.id)} className="btn btn-sm btn-danger">Delete</button>
                                     </td>
                                 </tr>
                             )

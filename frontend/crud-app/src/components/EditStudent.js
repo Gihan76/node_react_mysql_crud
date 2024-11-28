@@ -1,39 +1,57 @@
 import axios from "axios";
-import { useState } from "react"
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const AddStudent = () => {
+export const EditStudent = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name : "",
         email : "",
     });
 
-    // save student data to db using backend function 
-    const handleSubmit = (e) => {
+    // fetch student data first and set on the input fields
+    useEffect(() => {
+        axios.get(`http://localhost:8081/viewStudent/${id}`)
+            .then((res) => {
+                // console.log("🚀 ~ .then ~ res:", res)
+                setFormData({
+                    ...formData,
+                    name : res?.data?.[0].name,
+                    email : res?.data?.[0].email,
+                });
+            })
+            .catch((err) => {
+                console.log("🚀 ~ useEffect ~ err:", err)
+            })
+    }, [id]);
+
+    // update student data to db using backend function 
+    const handleUpdate = (e) => {
         e.preventDefault();
         axios
-            .post('http://localhost:8081/addStudent', formData)
+            .put(`http://localhost:8081/updateStudent/${id}`, formData)
             .then((res) => {
                 // console.log("🚀 ~ .then ~ res:", res)
                 navigate('/');
             })
             .catch((err) => {
-                console.log("🚀 ~ handleSubmit ~ err:", err)
+                console.log("🚀 ~ handleUpdate ~ err:", err)
             })
     }
-
+    
     return(
         <div className="d-flex vh-100 bg-primary justify-content-center align-items-center">
             <div className="w-50 bg-white rounded p-3">
-                <form onSubmit={handleSubmit}>
-                    <h2>Add Student</h2>
+                <form onSubmit={handleUpdate}>
+                    <h2>Edit Student</h2>
                     <div className="mb-2">
                         <label htmlFor="">Name</label>
                         <input
                             type="text"
                             placeholder="Enter Name"
                             className="form-control"
+                            value={formData.name}
                             onChange={(e) => {
                                 setFormData({
                                     ...formData,
@@ -48,6 +66,7 @@ export const AddStudent = () => {
                             type="email"
                             placeholder="Enter Email Address"
                             className="form-control"
+                            value={formData.email}
                             onChange={(e) => {
                                 setFormData({
                                     ...formData,
@@ -56,9 +75,9 @@ export const AddStudent = () => {
                             }}
                         />
                     </div>
-                    <button className="btn btn-primary">Submit</button>
+                    <button className="btn btn-primary">Update</button>
                 </form>
             </div>
         </div>
-    )
-}
+    );
+};
